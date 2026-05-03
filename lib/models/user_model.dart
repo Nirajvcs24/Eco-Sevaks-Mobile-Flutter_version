@@ -3,6 +3,7 @@ class AppUser {
   final String name;
   final String email;
   final String role;
+  final String area;
   final List<String> joinedEvents;
   final List<String> createdEvents;
 
@@ -11,6 +12,7 @@ class AppUser {
     required this.name,
     required this.email,
     required this.role,
+    required this.area,
     this.joinedEvents = const [],
     this.createdEvents = const [],
   });
@@ -21,6 +23,7 @@ class AppUser {
       name: json['name'] ?? '',
       email: json['email'] ?? '',
       role: json['role'] ?? 'user',
+      area: json['area'] ?? '',
       joinedEvents: List<String>.from(json['joinedEvents']?.map((e) => e.toString()) ?? []),
       createdEvents: List<String>.from(json['createdEvents']?.map((e) => e.toString()) ?? []),
     );
@@ -32,6 +35,7 @@ class AppUser {
       'name': name,
       'email': email,
       'role': role,
+      'area': area,
       'joinedEvents': joinedEvents,
       'createdEvents': createdEvents,
     };

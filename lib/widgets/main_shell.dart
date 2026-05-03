@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -17,55 +18,61 @@ class MainShell extends StatelessWidget {
     final String location = GoRouterState.of(context).matchedLocation;
 
     return Scaffold(
+      extendBody: true,
       body: child,
-      bottomNavigationBar: Container(
-        height: 80,
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.9),
-          border: Border(top: BorderSide(color: Colors.grey[200]!, width: 0.5)),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _NavItem(
-              icon: LucideIcons.home,
-              label: 'Home',
-              isActive: location == '/',
-              onTap: () => context.go('/'),
+      bottomNavigationBar: ClipRRect(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+          child: Container(
+            height: 80,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.6),
+              border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.2), width: 1)),
             ),
-            _NavItem(
-              icon: LucideIcons.calendar,
-              label: 'Events',
-              isActive: location == '/events',
-              onTap: () => context.go('/events'),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _NavItem(
+                  icon: LucideIcons.home,
+                  label: 'Home',
+                  isActive: location == '/',
+                  onTap: () => context.go('/'),
+                ),
+                _NavItem(
+                  icon: LucideIcons.calendar,
+                  label: 'Events',
+                  isActive: location == '/events',
+                  onTap: () => context.go('/events'),
+                ),
+                _CenterNavItem(
+                  icon: LucideIcons.plusCircle,
+                  label: 'Create',
+                  isActive: location == '/create-event',
+                  onTap: () => context.go('/create-event'),
+                ),
+                if (user?.role == 'admin')
+                  _NavItem(
+                    icon: LucideIcons.shield,
+                    label: 'Admin',
+                    isActive: location == '/admin',
+                    onTap: () => context.go('/admin'),
+                  )
+                else
+                  _NavItem(
+                    icon: LucideIcons.layoutDashboard,
+                    label: 'Dashboard',
+                    isActive: location == '/dashboard',
+                    onTap: () => context.go('/dashboard'),
+                  ),
+                _NavItem(
+                  icon: LucideIcons.user,
+                  label: 'Profile',
+                  isActive: location == '/profile',
+                  onTap: () => context.go('/profile'),
+                ),
+              ],
             ),
-            _CenterNavItem(
-              icon: LucideIcons.plusCircle,
-              label: 'Create',
-              isActive: location == '/create-event',
-              onTap: () => context.go('/create-event'),
-            ),
-            if (user?.role == 'admin')
-              _NavItem(
-                icon: LucideIcons.shield,
-                label: 'Admin',
-                isActive: location == '/admin',
-                onTap: () => context.go('/admin'),
-              )
-            else
-              _NavItem(
-                icon: LucideIcons.layoutDashboard,
-                label: 'Dashboard',
-                isActive: location == '/dashboard',
-                onTap: () => context.go('/dashboard'),
-              ),
-            _NavItem(
-              icon: LucideIcons.user,
-              label: 'Profile',
-              isActive: location == '/profile',
-              onTap: () => context.go('/profile'),
-            ),
-          ],
+          ),
         ),
       ),
     );

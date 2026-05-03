@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -184,7 +183,32 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                   ),
                   const SizedBox(height: 24),
 
-                  if (_event!.whatToBring != null) ...[
+                  // Location Details
+                  const Text('Location Details', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.dark)),
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[50],
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.grey[200]!),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(_event!.isVirtual ? LucideIcons.link : LucideIcons.mapPin, size: 20, color: AppColors.primary),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            _event!.locationDetails.isEmpty ? (_event!.isVirtual ? 'Link provided after joining' : 'Address provided after joining') : _event!.locationDetails,
+                            style: const TextStyle(fontSize: 14, color: AppColors.dark, fontWeight: FontWeight.w500),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  if (_event!.whatToBring != null && _event!.whatToBring!.isNotEmpty) ...[
                     const Text('What to Bring', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.dark)),
                     const SizedBox(height: 12),
                     ..._event!.whatToBring!.split('. ').where((s) => s.isNotEmpty).map((item) => Padding(

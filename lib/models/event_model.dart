@@ -5,6 +5,7 @@ class AppEvent {
   final DateTime date;
   final String type; // 'in-person' or 'virtual'
   final String location;
+  final String locationDetails;
   final List<String> tags;
   final String imageUrl;
   final List<String> attendees;
@@ -19,6 +20,7 @@ class AppEvent {
     required this.date,
     required this.type,
     required this.location,
+    required this.locationDetails,
     required this.tags,
     required this.imageUrl,
     this.attendees = const [],
@@ -35,6 +37,7 @@ class AppEvent {
       date: DateTime.parse(json['date'] ?? DateTime.now().toIso8601String()),
       type: json['type'] ?? 'in-person',
       location: json['location'] ?? '',
+      locationDetails: json['locationDetails'] ?? '',
       tags: json['tags'] is String
           ? (json['tags'] as String).split(',').where((t) => t.isNotEmpty).toList()
           : List<String>.from(json['tags'] ?? []),
@@ -54,6 +57,7 @@ class AppEvent {
       'date': date.toIso8601String(),
       'type': type,
       'location': location,
+      'locationDetails': locationDetails,
       'tags': tags,
       'imageUrl': imageUrl,
       'attendees': attendees,

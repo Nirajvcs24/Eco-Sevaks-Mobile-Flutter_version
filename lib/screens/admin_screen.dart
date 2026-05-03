@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../models/event_model.dart';
@@ -258,7 +257,7 @@ class _AdminScreenState extends State<AdminScreen> {
                   width: 50,
                   height: 50,
                   fit: BoxFit.cover,
-                  errorWidget: (_, __, ___) => Container(color: AppColors.primary, child: Center(child: Text(event.title[0], style: const TextStyle(color: Colors.white)))),
+                  errorWidget: (context, url, error) => Container(color: AppColors.primary, child: Center(child: Text(event.title[0], style: const TextStyle(color: Colors.white)))),
                 ),
               ),
               const SizedBox(width: 12),

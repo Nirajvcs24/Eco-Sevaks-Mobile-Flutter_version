@@ -20,6 +20,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   final _titleController = TextEditingController();
   final _descController = TextEditingController();
   final _locationController = TextEditingController();
+  final _locationDetailsController = TextEditingController();
   final _imageUrlController = TextEditingController();
   final _maxVolunteersController = TextEditingController(text: '0');
   final _whatToBringController = TextEditingController();
@@ -27,7 +28,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
 
   DateTime? _selectedDate;
   String _type = 'virtual';
-  List<String> _tags = [];
+  final List<String> _tags = [];
   bool _isSubmitting = false;
 
   Future<void> _selectDate() async {
@@ -38,6 +39,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       lastDate: DateTime.now().add(const Duration(days: 365)),
     );
     if (picked != null) {
+      if (!mounted) return;
       final TimeOfDay? time = await showTimePicker(
         context: context,
         initialTime: TimeOfDay.now(),
@@ -74,6 +76,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         'date': _selectedDate!.toIso8601String(),
         'type': _type,
         'location': _locationController.text,
+        'locationDetails': _locationDetailsController.text,
         'imageUrl': _imageUrlController.text,
         'maxVolunteers': int.tryParse(_maxVolunteersController.text) ?? 0,
         'whatToBring': _whatToBringController.text,
@@ -152,7 +155,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                   ),
                   const SizedBox(height: 20),
                   DropdownButtonFormField<String>(
-                    value: _type,
+                    initialValue: _type,
                     decoration: InputDecoration(
                       labelText: 'Event Type',
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -166,12 +169,31 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                   const SizedBox(height: 20),
                   if (_type == 'in-person') ...[
                     CustomInput(
-                      label: 'Location',
+                      label: 'City / Area',
                       controller: _locationController,
+                      required: true,
                       leftIcon: const Icon(LucideIcons.mapPin, size: 20, color: AppColors.textMuted),
+                      hint: 'e.g. Mumbai, Navi Mumbai',
                     ),
                     const SizedBox(height: 20),
+                    CustomInput(
+                      label: 'Full Address / Meeting Point',
+                      controller: _locationDetailsController,
+                      required: true,
+                      maxLines: 2,
+                      leftIcon: const Icon(LucideIcons.navigation, size: 20, color: AppColors.textMuted),
+                      hint: 'Detailed address where volunteers should meet',
+                    ),
+                  ] else ...[
+                    CustomInput(
+                      label: 'Virtual Link / Platform Info',
+                      controller: _locationDetailsController,
+                      required: true,
+                      leftIcon: const Icon(LucideIcons.link, size: 20, color: AppColors.textMuted),
+                      hint: 'e.g. Zoom link or Google Meet instructions',
+                    ),
                   ],
+                  const SizedBox(height: 20),
                   CustomInput(
                     label: 'Max Volunteers (0 = unlimited)',
                     controller: _maxVolunteersController,

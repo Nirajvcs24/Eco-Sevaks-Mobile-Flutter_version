@@ -1,10 +1,8 @@
 import 'dart:convert';
-import 'package:mongo_dart/mongo_dart.dart' show ObjectId;
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../models/user_model.dart';
 import '../models/event_model.dart';
-import 'mongodb_service.dart';
 
 class ApiService {
   static const String baseUrl = 'https://eco-sevaks-backend.onrender.com/api';
@@ -65,7 +63,7 @@ class ApiService {
     }
   }
 
-  Future<void> register(String name, String email, String password, String role) async {
+  Future<void> register(String name, String email, String password, String role, String area) async {
     final response = await http.post(
       Uri.parse('$baseUrl/auth/register'),
       headers: _headers,
@@ -74,6 +72,7 @@ class ApiService {
         'email': email,
         'password': password,
         'role': role,
+        'area': area,
       }),
     );
 

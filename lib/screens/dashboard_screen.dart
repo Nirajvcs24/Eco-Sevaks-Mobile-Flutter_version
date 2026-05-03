@@ -9,9 +9,12 @@ import '../services/api_service.dart';
 import '../widgets/event_card.dart';
 import '../widgets/badge_widget.dart';
 import '../widgets/custom_button.dart';
-import '../widgets/empty_state.dart';
 import '../widgets/loading_spinner.dart';
+import '../widgets/empty_state.dart';
 import '../constants/app_colors.dart';
+import '../widgets/count_up_text.dart';
+import '../widgets/liquid_glass_container.dart';
+import '../widgets/fade_in_up.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -24,6 +27,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   final ApiService _apiService = ApiService();
   List<AppEvent> _joinedEvents = [];
   List<AppEvent> _createdEvents = [];
+  List<AppEvent> _recommendedEvents = [];
   bool _isLoading = true;
 
   @override
@@ -41,10 +45,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
       final results = await Future.wait([
         _apiService.getJoinedEvents(authProvider.user!.id),
         _apiService.getCreatedEvents(authProvider.user!.id),
+        _apiService.getAllEvents(),
       ]);
       setState(() {
-        _joinedEvents = results[0];
-        _createdEvents = results[1];
+        _joinedEvents = results[0] as List<AppEvent>;
+        _createdEvents = results[1] as List<AppEvent>;
+        final allEvents = results[2] as List<AppEvent>;
+        
+        // Recommendations based on area
+        final userArea = authProvider.user!.area.toLowerCase();
+        _recommendedEvents = allEvents.where((e) {
+          final matchesArea = e.location.toLowerCase().contains(userArea);
+          final notJoined = !_joinedEvents.any((je) => je.id == e.id);
+          final notCreated = !_createdEvents.any((ce) => ce.id == e.id);
+          return matchesArea && notJoined && notCreated;
+        }).toList();
       });
     } catch (e) {
       debugPrint('Error fetching dashboard data: $e');
@@ -57,11 +72,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
     try {
       await _apiService.leaveEvent(eventId);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('RSVP cancelled')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('RSVP cancelled')));
       _fetchData();
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
     }
   }
 
@@ -72,8 +91,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
         title: const Text('Delete Event'),
         content: const Text('Are you sure you want to delete this event?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Delete', style: TextStyle(color: Colors.red))),
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
         ],
       ),
     );
@@ -82,11 +107,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
       try {
         await _apiService.deleteEvent(eventId);
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Event deleted')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Event deleted')));
         _fetchData();
       } catch (e) {
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.toString())));
       }
     }
   }
@@ -100,11 +129,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
       return const Scaffold(body: Center(child: Text('Please log in')));
     }
 
-    final upcomingEvents = _joinedEvents.where((e) => e.date.isAfter(DateTime.now())).toList();
+    final upcomingEvents = _joinedEvents
+        .where((e) => e.date.isAfter(DateTime.now()))
+        .toList();
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Dashboard', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Dashboard',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
       ),
       body: RefreshIndicator(
         onRefresh: _fetchData,
@@ -113,42 +147,54 @@ class _DashboardScreenState extends State<DashboardScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Welcome Banner
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [AppColors.primary, AppColors.primaryDark],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
+              FadeInUp(
+                child: LiquidGlassContainer(
+                  blur: 20,
+                  opacity: 0.7,
+                  gradientColors: [AppColors.paleGreen, AppColors.paleGreen],
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(8)),
-                          child: const Icon(LucideIcons.leaf, color: Colors.white, size: 16),
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const Icon(
+                                LucideIcons.leaf,
+                                color: AppColors.primary,
+                                size: 16,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            BadgeWidget(
+                              label: user.role == 'admin' ? 'Admin' : 'Member',
+                              variant: BadgeVariant.secondary,
+                              size: BadgeSize.sm,
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 8),
-                        BadgeWidget(
-                          label: user.role == 'admin' ? 'Admin' : 'Member',
-                          variant: BadgeVariant.secondary,
-                          size: BadgeSize.sm,
+                        const SizedBox(height: 12),
+                        Text(
+                          'Welcome, ${user.name}! 👋',
+                          style: const TextStyle(
+                            color: AppColors.dark,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const Text(
+                          'Your eco-volunteering overview',
+                          style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Welcome, ${user.name}! 👋',
-                      style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
-                    const Text('Your eco-volunteering overview', style: TextStyle(color: Color(0xFFD1FAE5), fontSize: 12)),
-                  ],
+                  ),
                 ),
               ),
               const SizedBox(height: 20),
@@ -162,10 +208,30 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 crossAxisSpacing: 12,
                 childAspectRatio: 1.5,
                 children: [
-                  _buildStatCard(LucideIcons.heart, _joinedEvents.length.toString(), 'Joined', AppColors.primary),
-                  _buildStatCard(LucideIcons.calendar, upcomingEvents.length.toString(), 'Upcoming', AppColors.accent),
-                  _buildStatCard(LucideIcons.clock, (_joinedEvents.length - upcomingEvents.length).toString(), 'Completed', Colors.green),
-                  _buildStatCard(LucideIcons.users, _createdEvents.length.toString(), 'Created', AppColors.secondary),
+                  _buildStatCard(
+                    LucideIcons.heart,
+                    _joinedEvents.length.toString(),
+                    'Joined',
+                    AppColors.primary,
+                  ),
+                  _buildStatCard(
+                    LucideIcons.calendar,
+                    upcomingEvents.length.toString(),
+                    'Upcoming',
+                    AppColors.accent,
+                  ),
+                  _buildStatCard(
+                    LucideIcons.clock,
+                    (_joinedEvents.length - upcomingEvents.length).toString(),
+                    'Completed',
+                    Colors.green,
+                  ),
+                  _buildStatCard(
+                    LucideIcons.users,
+                    _createdEvents.length.toString(),
+                    'Created',
+                    AppColors.secondary,
+                  ),
                 ],
               ),
               const SizedBox(height: 24),
@@ -195,8 +261,81 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
               const SizedBox(height: 32),
 
+              // Recommendations
+              if (user.area.isNotEmpty) ...[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Recommended in ${user.area}',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.dark,
+                      ),
+                    ),
+                    BadgeWidget(
+                      label: 'New',
+                      variant: BadgeVariant.accent,
+                      size: BadgeSize.sm,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                if (_isLoading)
+                  const Center(child: LoadingSpinner())
+                else if (_recommendedEvents.isEmpty)
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.05),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: AppColors.primary.withValues(alpha: 0.1)),
+                    ),
+                    child: const Row(
+                      children: [
+                        Icon(LucideIcons.mapPin, color: AppColors.primary, size: 20),
+                        SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            'No events found in your area yet. Check back soon!',
+                            style: TextStyle(color: AppColors.primary, fontSize: 13),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                else
+                  SizedBox(
+                    height: 200,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: _recommendedEvents.length,
+                      itemBuilder: (context, index) {
+                        final event = _recommendedEvents[index];
+                        return Container(
+                          width: 280,
+                          margin: const EdgeInsets.only(right: 16, bottom: 8),
+                          child: EventCard(
+                            event: event,
+                            onTap: () => context.push('/event/${event.id}'),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                const SizedBox(height: 32),
+              ],
+
               // Joined Events
-              const Text('Joined Events', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.dark)),
+              const Text(
+                'Joined Events',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.dark,
+                ),
+              ),
               const SizedBox(height: 12),
               if (_isLoading)
                 const Center(child: LoadingSpinner())
@@ -215,14 +354,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   itemCount: _joinedEvents.length,
                   itemBuilder: (context, index) => EventCard(
                     event: _joinedEvents[index],
-                    onTap: () => context.push('/event/${_joinedEvents[index].id}'),
+                    onTap: () =>
+                        context.push('/event/${_joinedEvents[index].id}'),
                     onCancel: () => _handleCancelRsvp(_joinedEvents[index].id),
                   ),
                 ),
               const SizedBox(height: 32),
 
               // Created Events
-              const Text('Created Events', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.dark)),
+              const Text(
+                'Created Events',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.dark,
+                ),
+              ),
               const SizedBox(height: 12),
               if (_isLoading)
                 const Center(child: LoadingSpinner())
@@ -239,7 +386,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: _createdEvents.length,
-                  itemBuilder: (context, index) => _buildCreatedEventItem(_createdEvents[index]),
+                  itemBuilder: (context, index) =>
+                      _buildCreatedEventItem(_createdEvents[index]),
                 ),
               const SizedBox(height: 100),
             ],
@@ -249,31 +397,62 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildStatCard(IconData icon, String value, String label, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey[100]!),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(value, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.dark)),
-              Text(label, style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
-            ],
-          ),
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
-            child: Icon(icon, color: color, size: 20),
-          ),
-        ],
+  Widget _buildStatCard(
+    IconData icon,
+    String value,
+    String label,
+    Color color,
+  ) {
+    return FadeInUp(
+      delay: const Duration(milliseconds: 400),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.grey[100]!),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CountUpText(
+                  value: value,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.dark,
+                  ),
+                ),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: AppColors.textMuted,
+                  ),
+                ),
+              ],
+            ),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, color: color, size: 20),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -296,7 +475,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Expanded(
                 child: Text(
                   event.title,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -307,13 +489,33 @@ class _DashboardScreenState extends State<DashboardScreen> {
           const SizedBox(height: 8),
           Row(
             children: [
-              const Icon(LucideIcons.calendar, size: 14, color: AppColors.textMuted),
+              const Icon(
+                LucideIcons.calendar,
+                size: 14,
+                color: AppColors.textMuted,
+              ),
               const SizedBox(width: 4),
-              Text(DateFormat('d MMM yyyy').format(event.date), style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
+              Text(
+                DateFormat('d MMM yyyy').format(event.date),
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: AppColors.textMuted,
+                ),
+              ),
               const SizedBox(width: 16),
-              const Icon(LucideIcons.users, size: 14, color: AppColors.textMuted),
+              const Icon(
+                LucideIcons.users,
+                size: 14,
+                color: AppColors.textMuted,
+              ),
               const SizedBox(width: 4),
-              Text(event.attendees.length.toString(), style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
+              Text(
+                event.attendees.length.toString(),
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: AppColors.textMuted,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 16),
@@ -331,10 +533,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
               const SizedBox(width: 8),
               IconButton(
                 onPressed: () => _handleDeleteEvent(event.id),
-                icon: const Icon(LucideIcons.trash2, color: Colors.red, size: 18),
+                icon: const Icon(
+                  LucideIcons.trash2,
+                  color: Colors.red,
+                  size: 18,
+                ),
                 style: IconButton.styleFrom(
                   backgroundColor: Colors.red[50],
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
               ),
             ],

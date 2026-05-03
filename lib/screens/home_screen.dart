@@ -4,6 +4,9 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../constants/app_colors.dart';
 import '../widgets/custom_button.dart';
+import '../widgets/count_up_text.dart';
+import '../widgets/liquid_glass_container.dart';
+import '../widgets/fade_in_up.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -75,61 +78,73 @@ class HomeScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   // Badge
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+                  FadeInUp(
+                    delay: const Duration(milliseconds: 200),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(LucideIcons.sparkles, color: AppColors.secondary, size: 14),
+                          SizedBox(width: 6),
+                          Text(
+                            'Join 10,000+ volunteers',
+                            style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w500),
+                          ),
+                        ],
+                      ),
                     ),
-                    child: const Row(
-                      mainAxisSize: MainAxisSize.min,
+                  ),
+                  const SizedBox(height: 16),
+                  const FadeInUp(
+                    delay: Duration(milliseconds: 400),
+                    child: Text(
+                      'Join the Green Movement in India',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        height: 1.2,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  const FadeInUp(
+                    delay: Duration(milliseconds: 600),
+                    child: Text(
+                      'Find virtual and in-person environmental volunteer opportunities near you.',
+                      style: TextStyle(color: Color(0xFFE2E8F0), fontSize: 14),
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  FadeInUp(
+                    delay: const Duration(milliseconds: 800),
+                    child: Row(
                       children: [
-                        Icon(LucideIcons.sparkles, color: AppColors.secondary, size: 14),
-                        SizedBox(width: 6),
-                        Text(
-                          'Join 10,000+ volunteers',
-                          style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w500),
+                        Expanded(
+                          child: CustomButton(
+                            text: 'Find Events',
+                            onPressed: () => context.push('/events'),
+                            leftIcon: const Icon(LucideIcons.search, size: 18, color: Colors.white),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: CustomButton(
+                            text: 'Get Started',
+                            onPressed: () => context.push('/profile'),
+                            variant: ButtonVariant.outline,
+                            textColorOverride: Colors.white,
+                            leftIcon: const Icon(LucideIcons.arrowRight, size: 18, color: Colors.white),
+                          ),
                         ),
                       ],
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Join the Green Movement in India',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      height: 1.2,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Find virtual and in-person environmental volunteer opportunities near you.',
-                    style: TextStyle(color: Color(0xFFE2E8F0), fontSize: 14),
-                  ),
-                  const SizedBox(height: 32),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: CustomButton(
-                          text: 'Find Events',
-                          onPressed: () => context.go('/events'),
-                          leftIcon: const Icon(LucideIcons.search, size: 18, color: Colors.white),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: CustomButton(
-                          text: 'Get Started',
-                          onPressed: () => context.go('/register'),
-                          variant: ButtonVariant.outline,
-                          textColorOverride: Colors.white,
-                          leftIcon: const Icon(LucideIcons.arrowRight, size: 18, color: Colors.white),
-                        ),
-                      ),
-                    ],
                   ),
                 ],
               ),
@@ -141,28 +156,28 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildStats() {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppColors.primary, AppColors.primaryDark],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+    return FadeInUp(
+      delay: const Duration(milliseconds: 1000),
+      child: LiquidGlassContainer(
+        blur: 20,
+        opacity: 0.7,
+        gradientColors: [AppColors.paleGreen, AppColors.paleGreen],
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: GridView.count(
+            crossAxisCount: 2,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            mainAxisSpacing: 24,
+            childAspectRatio: 2,
+            children: [
+              _StatItem(value: '10,000', label: 'Volunteers', suffix: '+'),
+              _StatItem(value: '500', label: 'Events', suffix: '+'),
+              _StatItem(value: '50', label: 'Cities', suffix: '+'),
+              _StatItem(value: '25,000', label: 'Trees Planted', suffix: '+'),
+            ],
+          ),
         ),
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: GridView.count(
-        crossAxisCount: 2,
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        mainAxisSpacing: 24,
-        childAspectRatio: 2,
-        children: [
-          _StatItem(value: '10,000+', label: 'Volunteers'),
-          _StatItem(value: '500+', label: 'Events'),
-          _StatItem(value: '50+', label: 'Cities'),
-          _StatItem(value: '25,000+', label: 'Trees Planted'),
-        ],
       ),
     );
   }
@@ -244,7 +259,7 @@ class HomeScreen extends StatelessWidget {
         const SizedBox(height: 24),
         CustomButton(
           text: 'Explore Opportunities',
-          onPressed: () => context.go('/events'),
+          onPressed: () => context.push('/events'),
           leftIcon: const Icon(LucideIcons.arrowRight, size: 18, color: Colors.white),
         ),
       ],
@@ -295,7 +310,7 @@ class HomeScreen extends StatelessWidget {
               Expanded(
                 child: CustomButton(
                   text: 'Join Now',
-                  onPressed: () => context.go('/register'),
+                  onPressed: () => context.go('/profile'),
                   variant: ButtonVariant.secondary,
                   leftIcon: const Icon(LucideIcons.leaf, size: 18, color: AppColors.primary),
                 ),
@@ -304,7 +319,7 @@ class HomeScreen extends StatelessWidget {
               Expanded(
                 child: CustomButton(
                   text: 'Browse',
-                  onPressed: () => context.go('/events'),
+                  onPressed: () => context.push('/events'),
                   variant: ButtonVariant.outline,
                   textColorOverride: Colors.white,
                   leftIcon: const Icon(LucideIcons.arrowRight, size: 18, color: Colors.white),
@@ -321,36 +336,23 @@ class HomeScreen extends StatelessWidget {
 class _StatItem extends StatelessWidget {
   final String value;
   final String label;
+  final String suffix;
 
-  const _StatItem({required this.value, required this.label});
+  const _StatItem({required this.value, required this.label, this.suffix = ''});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text(value, style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
-        Text(label, style: const TextStyle(color: Color(0xFFD1FAE5), fontSize: 12, fontWeight: FontWeight.w500)),
+        CountUpText(
+          value: value,
+          suffix: suffix,
+          style: const TextStyle(color: AppColors.dark, fontSize: 24, fontWeight: FontWeight.bold),
+        ),
+        Text(label, style: const TextStyle(color: AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.w500)),
       ],
     );
   }
 }
 
-// Extension to support text color override in CustomButton
-extension CustomButtonExtension on CustomButton {
-  CustomButton copyWith({Color? textColorOverride}) {
-    return CustomButton(
-      text: text,
-      onPressed: onPressed,
-      variant: variant,
-      size: size,
-      fullWidth: fullWidth,
-      isLoading: isLoading,
-      isDisabled: isDisabled,
-      leftIcon: leftIcon,
-      rightIcon: rightIcon,
-      // Note: We need to modify CustomButton to support this or use a different approach.
-      // For now, I'll update CustomButton.
-    );
-  }
-}

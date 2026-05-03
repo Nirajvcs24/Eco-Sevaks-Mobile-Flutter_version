@@ -17,12 +17,13 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
+  final _areaController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
   String? _error;
 
   Future<void> _handleRegister() async {
-    if (_nameController.text.isEmpty || _emailController.text.isEmpty || _passwordController.text.isEmpty) {
+    if (_nameController.text.isEmpty || _emailController.text.isEmpty || _passwordController.text.isEmpty || _areaController.text.isEmpty) {
       setState(() => _error = 'Please fill in all fields.');
       return;
     }
@@ -38,6 +39,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             _emailController.text,
             _passwordController.text,
             'user',
+            _areaController.text,
           );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -132,6 +134,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
                       leftIcon: const Icon(LucideIcons.mail, size: 20, color: AppColors.textMuted),
+                    ),
+                    const SizedBox(height: 20),
+                    CustomInput(
+                      label: 'Area / City',
+                      controller: _areaController,
+                      leftIcon: const Icon(LucideIcons.mapPin, size: 20, color: AppColors.textMuted),
+                      hint: 'e.g. Mumbai, Delhi',
                     ),
                     const SizedBox(height: 20),
                     CustomInput(

@@ -34,9 +34,9 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  Future<void> register(String name, String email, String password, String role) async {
+  Future<void> register(String name, String email, String password, String role, String area) async {
     try {
-      await _apiService.register(name, email, password, role);
+      await _apiService.register(name, email, password, role, area);
     } catch (e) {
       rethrow;
     }
