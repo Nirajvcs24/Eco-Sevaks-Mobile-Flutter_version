@@ -17,9 +17,20 @@ class AuthProvider with ChangeNotifier {
   }
 
   Future<void> _init() async {
-    _user = await _apiService.getCurrentUser();
-    _isLoading = false;
+    await refreshUser();
+  }
+
+  Future<void> refreshUser() async {
+    _isLoading = true;
     notifyListeners();
+    try {
+      _user = await _apiService.getCurrentUser();
+    } catch (e) {
+      debugPrint('Error refreshing user: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   Future<bool> login(String email, String password) async {

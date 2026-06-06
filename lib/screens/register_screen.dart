@@ -56,6 +56,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -65,9 +68,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
             children: [
               IconButton(
                 onPressed: () => context.go('/login'),
-                icon: const Icon(LucideIcons.arrowLeft, color: AppColors.textSecondary),
+                icon: Icon(LucideIcons.arrowLeft, color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
                 style: IconButton.styleFrom(
-                  backgroundColor: Colors.white,
+                  backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
                   padding: const EdgeInsets.all(12),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
@@ -96,14 +99,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-              const Text(
+              Text(
                 'Join Eco-Sevaks',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.dark),
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface),
               ),
               const SizedBox(height: 4),
-              const Text(
+              Text(
                 'Create your account to make a difference',
-                style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+                style: TextStyle(fontSize: 14, color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
               ),
               const SizedBox(height: 40),
 
@@ -111,35 +114,36 @@ class _RegisterScreenState extends State<RegisterScreen> {
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: isDark ? const Color(0xFF1E293B) : Colors.white,
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.05),
+                      color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
                       blurRadius: 20,
                       offset: const Offset(0, 10),
                     ),
                   ],
+                  border: isDark ? Border.all(color: const Color(0xFF334155)) : null,
                 ),
                 child: Column(
                   children: [
                     CustomInput(
                       label: 'Full Name',
                       controller: _nameController,
-                      leftIcon: const Icon(LucideIcons.user, size: 20, color: AppColors.textMuted),
+                      leftIcon: Icon(LucideIcons.user, size: 20, color: theme.colorScheme.onSurface.withValues(alpha: 0.4)),
                     ),
                     const SizedBox(height: 20),
                     CustomInput(
                       label: 'Email',
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
-                      leftIcon: const Icon(LucideIcons.mail, size: 20, color: AppColors.textMuted),
+                      leftIcon: Icon(LucideIcons.mail, size: 20, color: theme.colorScheme.onSurface.withValues(alpha: 0.4)),
                     ),
                     const SizedBox(height: 20),
                     CustomInput(
                       label: 'Area / City',
                       controller: _areaController,
-                      leftIcon: const Icon(LucideIcons.mapPin, size: 20, color: AppColors.textMuted),
+                      leftIcon: Icon(LucideIcons.mapPin, size: 20, color: theme.colorScheme.onSurface.withValues(alpha: 0.4)),
                       hint: 'e.g. Mumbai, Delhi',
                     ),
                     const SizedBox(height: 20),
@@ -147,7 +151,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       label: 'Password',
                       controller: _passwordController,
                       isPassword: true,
-                      leftIcon: const Icon(LucideIcons.lock, size: 20, color: AppColors.textMuted),
+                      leftIcon: Icon(LucideIcons.lock, size: 20, color: theme.colorScheme.onSurface.withValues(alpha: 0.4)),
                     ),
                     const SizedBox(height: 20),
                     Container(
@@ -175,8 +179,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.red[50],
-                          border: Border.all(color: Colors.red[100]!),
+                          color: Colors.red.withValues(alpha: 0.1),
+                          border: Border.all(color: Colors.red.withValues(alpha: 0.2)),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Row(
@@ -209,7 +213,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text("Already have an account? ", style: TextStyle(color: AppColors.textSecondary)),
+                  Text("Already have an account? ", style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.6))),
                   GestureDetector(
                     onTap: () => context.go('/login'),
                     child: const Text(
@@ -221,10 +225,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
 
               const SizedBox(height: 40),
-              const Text(
-                'By creating an account, you agree to our Terms & Privacy Policy',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: AppColors.textMuted, fontSize: 10),
+              Center(
+                child: Text(
+                  'By creating an account, you agree to our Terms & Privacy Policy',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.4), fontSize: 10),
+                ),
               ),
             ],
           ),
@@ -233,3 +239,4 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 }
+

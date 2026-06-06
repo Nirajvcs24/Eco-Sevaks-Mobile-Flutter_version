@@ -6,13 +6,16 @@ import '../providers/auth_provider.dart';
 import '../constants/app_colors.dart';
 import '../widgets/custom_button.dart';
 
+
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
+
     final user = authProvider.user;
+    final theme = Theme.of(context);
 
     if (user == null) {
       return Scaffold(
@@ -20,10 +23,13 @@ class ProfileScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(LucideIcons.user, size: 64, color: AppColors.textMuted),
+              Icon(LucideIcons.user, size: 64, color: theme.colorScheme.onSurface.withValues(alpha: 0.2)),
               const SizedBox(height: 16),
-              const Text('Please sign in to view your profile'),
-              const SizedBox(height: 16),
+              Text(
+                'Please sign in to view your profile',
+                style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
+              ),
+              const SizedBox(height: 24),
               CustomButton(
                 text: 'Sign In',
                 onPressed: () => context.go('/login'),
@@ -36,7 +42,7 @@ class ProfileScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profile', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text('Profile'),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
@@ -58,11 +64,11 @@ class ProfileScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                   Text(
                     user.name,
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.dark),
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface),
                   ),
                   Text(
                     user.email,
-                    style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
+                    style: TextStyle(fontSize: 14, color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
                   ),
                   const SizedBox(height: 8),
                   Container(
@@ -82,9 +88,14 @@ class ProfileScreen extends StatelessWidget {
             const SizedBox(height: 40),
 
             // Options
-            _buildOptionTile(LucideIcons.settings, 'Settings'),
-            _buildOptionTile(LucideIcons.shield, 'Privacy'),
-            _buildOptionTile(LucideIcons.helpCircle, 'Help & Support'),
+            _buildOptionTile(
+              context,
+              LucideIcons.settings,
+              'Settings',
+              onTap: () => context.push('/settings'),
+            ),
+            _buildOptionTile(context, LucideIcons.shield, 'Privacy'),
+            _buildOptionTile(context, LucideIcons.helpCircle, 'Help & Support'),
             const SizedBox(height: 40),
 
             CustomButton(
@@ -103,24 +114,30 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildOptionTile(IconData icon, String title) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey[100]!),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, size: 20, color: AppColors.textMuted),
-          const SizedBox(width: 16),
-          Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.dark)),
-          const Spacer(),
-          const Icon(LucideIcons.chevronRight, size: 16, color: AppColors.textMuted),
-        ],
+  Widget _buildOptionTile(BuildContext context, IconData icon, String title, {Widget? trailing, VoidCallback? onTap}) {
+    final theme = Theme.of(context);
+    
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: theme.brightness == Brightness.light ? Colors.white : const Color(0xFF1E293B),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: theme.brightness == Brightness.light ? Colors.grey[100]! : const Color(0xFF334155)),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 20, color: theme.colorScheme.onSurface.withValues(alpha: 0.4)),
+            const SizedBox(width: 16),
+            Text(title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface)),
+            const Spacer(),
+            trailing ?? Icon(LucideIcons.chevronRight, size: 16, color: theme.colorScheme.onSurface.withValues(alpha: 0.4)),
+          ],
+        ),
       ),
     );
   }
 }
+

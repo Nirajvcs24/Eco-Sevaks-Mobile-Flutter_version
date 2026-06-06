@@ -35,7 +35,12 @@ class _LoginScreenState extends State<LoginScreen> {
         if (mounted) context.go('/');
       }
     } catch (e) {
-      setState(() => _error = e.toString().replaceFirst('Exception: ', ''));
+      final errorStr = e.toString();
+      if (errorStr.contains('Connection error') || errorStr.contains('SocketException')) {
+        setState(() => _error = 'Connection error: Please check your internet connection');
+      } else {
+        setState(() => _error = 'Invalid Email / Password');
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -49,6 +54,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -58,9 +66,9 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               IconButton(
                 onPressed: () => context.go('/'),
-                icon: const Icon(LucideIcons.arrowLeft, color: AppColors.textSecondary),
+                icon: Icon(LucideIcons.arrowLeft, color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
                 style: IconButton.styleFrom(
-                  backgroundColor: Colors.white,
+                  backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
                   padding: const EdgeInsets.all(12),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
@@ -89,14 +97,14 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-              const Text(
+              Text(
                 'Welcome back',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.dark),
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface),
               ),
               const SizedBox(height: 4),
-              const Text(
+              Text(
                 'Sign in to continue your eco journey',
-                style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+                style: TextStyle(fontSize: 14, color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
               ),
               const SizedBox(height: 40),
 
@@ -104,15 +112,16 @@ class _LoginScreenState extends State<LoginScreen> {
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: isDark ? const Color(0xFF1E293B) : Colors.white,
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.05),
+                      color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
                       blurRadius: 20,
                       offset: const Offset(0, 10),
                     ),
                   ],
+                  border: isDark ? Border.all(color: const Color(0xFF334155)) : null,
                 ),
                 child: Column(
                   children: [
@@ -120,22 +129,22 @@ class _LoginScreenState extends State<LoginScreen> {
                       label: 'Email',
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
-                      leftIcon: const Icon(LucideIcons.mail, size: 20, color: AppColors.textMuted),
+                      leftIcon: Icon(LucideIcons.mail, size: 20, color: theme.colorScheme.onSurface.withValues(alpha: 0.4)),
                     ),
                     const SizedBox(height: 20),
                     CustomInput(
                       label: 'Password',
                       controller: _passwordController,
                       isPassword: true,
-                      leftIcon: const Icon(LucideIcons.lock, size: 20, color: AppColors.textMuted),
+                      leftIcon: Icon(LucideIcons.lock, size: 20, color: theme.colorScheme.onSurface.withValues(alpha: 0.4)),
                     ),
                     if (_error != null) ...[
                       const SizedBox(height: 16),
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.red[50],
-                          border: Border.all(color: Colors.red[100]!),
+                          color: Colors.red.withValues(alpha: 0.1),
+                          border: Border.all(color: Colors.red.withValues(alpha: 0.2)),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Row(
@@ -168,7 +177,7 @@ class _LoginScreenState extends State<LoginScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text("Don't have an account? ", style: TextStyle(color: AppColors.textSecondary)),
+                  Text("Don't have an account? ", style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.6))),
                   GestureDetector(
                     onTap: () => context.go('/register'),
                     child: const Text(
@@ -182,12 +191,12 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 40),
               Row(
                 children: [
-                  Expanded(child: Divider(color: Colors.grey[300])),
+                  Expanded(child: Divider(color: isDark ? const Color(0xFF334155) : Colors.grey[300])),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Text('Or try demo', style: TextStyle(color: Colors.grey[500], fontSize: 12)),
+                    child: Text('Or try demo', style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.4), fontSize: 12)),
                   ),
-                  Expanded(child: Divider(color: Colors.grey[300])),
+                  Expanded(child: Divider(color: isDark ? const Color(0xFF334155) : Colors.grey[300])),
                 ],
               ),
               const SizedBox(height: 20),
@@ -199,9 +208,11 @@ class _LoginScreenState extends State<LoginScreen> {
                 leftIcon: const Icon(LucideIcons.shield, size: 20, color: AppColors.primary),
               ),
               const SizedBox(height: 8),
-              const Text(
-                'admin@ecosevaks.com',
-                style: TextStyle(color: AppColors.textMuted, fontSize: 10),
+              Center(
+                child: Text(
+                  'admin@ecosevaks.com',
+                  style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.4), fontSize: 10),
+                ),
               ),
             ],
           ),
@@ -210,3 +221,4 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
+

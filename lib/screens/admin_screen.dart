@@ -117,6 +117,8 @@ class _AdminScreenState extends State<AdminScreen> {
   @override
   Widget build(BuildContext context) {
     final currentEvents = _activeTab == 'pending' ? _pendingEvents : (_activeTab == 'approved' ? _approvedEvents : _restrictedEvents);
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(
@@ -128,7 +130,7 @@ class _AdminScreenState extends State<AdminScreen> {
               child: const Icon(LucideIcons.shield, color: Colors.white, size: 20),
             ),
             const SizedBox(width: 12),
-            const Text('Admin Panel', style: TextStyle(fontWeight: FontWeight.bold)),
+            const Text('Admin Panel'),
           ],
         ),
       ),
@@ -139,9 +141,9 @@ class _AdminScreenState extends State<AdminScreen> {
             // Stats
             Row(
               children: [
-                _buildStatItem(LucideIcons.clock, _pendingEvents.length.toString(), 'Pending', Colors.orange),
+                _buildStatItem(context, LucideIcons.clock, _pendingEvents.length.toString(), 'Pending', Colors.orange),
                 const SizedBox(width: 12),
-                _buildStatItem(LucideIcons.checkCircle, _approvedEvents.length.toString(), 'Approved', Colors.green),
+                _buildStatItem(context, LucideIcons.checkCircle, _approvedEvents.length.toString(), 'Approved', Colors.green),
               ],
             ),
             const SizedBox(height: 20),
@@ -149,12 +151,15 @@ class _AdminScreenState extends State<AdminScreen> {
             // Tabs
             Container(
               padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(color: Colors.grey[100], borderRadius: BorderRadius.circular(12)),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF1E293B) : Colors.grey[100],
+                borderRadius: BorderRadius.circular(12),
+              ),
               child: Row(
                 children: [
-                  _buildTab('pending', 'Pending (${_pendingEvents.length})'),
-                  _buildTab('approved', 'Approved (${_approvedEvents.length})'),
-                  _buildTab('restricted', 'Restricted (${_restrictedEvents.length})'),
+                  _buildTab(context, 'pending', 'Pending (${_pendingEvents.length})'),
+                  _buildTab(context, 'approved', 'Approved (${_approvedEvents.length})'),
+                  _buildTab(context, 'restricted', 'Restricted (${_restrictedEvents.length})'),
                 ],
               ),
             ),
@@ -172,7 +177,7 @@ class _AdminScreenState extends State<AdminScreen> {
                         )
                       : ListView.builder(
                           itemCount: currentEvents.length,
-                          itemBuilder: (context, index) => _buildEventRow(currentEvents[index]),
+                          itemBuilder: (context, index) => _buildEventRow(context, currentEvents[index]),
                         ),
             ),
           ],
@@ -181,14 +186,16 @@ class _AdminScreenState extends State<AdminScreen> {
     );
   }
 
-  Widget _buildStatItem(IconData icon, String value, String label, Color color) {
+  Widget _buildStatItem(BuildContext context, IconData icon, String value, String label, Color color) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return Expanded(
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: isDark ? const Color(0xFF1E293B) : Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.grey[100]!),
+          border: Border.all(color: isDark ? const Color(0xFF334155) : Colors.grey[100]!),
         ),
         child: Row(
           children: [
@@ -201,8 +208,8 @@ class _AdminScreenState extends State<AdminScreen> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                Text(label, style: const TextStyle(fontSize: 10, color: AppColors.textMuted)),
+                Text(value, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface)),
+                Text(label, style: TextStyle(fontSize: 10, color: theme.colorScheme.onSurface.withValues(alpha: 0.4))),
               ],
             ),
           ],
@@ -211,15 +218,18 @@ class _AdminScreenState extends State<AdminScreen> {
     );
   }
 
-  Widget _buildTab(String key, String label) {
+  Widget _buildTab(BuildContext context, String key, String label) {
     final isActive = _activeTab == key;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    
     return Expanded(
       child: GestureDetector(
         onTap: () => setState(() => _activeTab = key),
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
-            color: isActive ? Colors.white : Colors.transparent,
+            color: isActive ? (isDark ? const Color(0xFF334155) : Colors.white) : Colors.transparent,
             borderRadius: BorderRadius.circular(8),
             boxShadow: isActive ? [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 4, offset: const Offset(0, 2))] : null,
           ),
@@ -229,7 +239,7 @@ class _AdminScreenState extends State<AdminScreen> {
             style: TextStyle(
               fontSize: 11,
               fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-              color: isActive ? AppColors.primary : AppColors.textMuted,
+              color: isActive ? AppColors.primary : theme.colorScheme.onSurface.withValues(alpha: 0.4),
             ),
           ),
         ),
@@ -237,14 +247,17 @@ class _AdminScreenState extends State<AdminScreen> {
     );
   }
 
-  Widget _buildEventRow(AppEvent event) {
+  Widget _buildEventRow(BuildContext context, AppEvent event) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF1E293B) : Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey[100]!),
+        border: Border.all(color: isDark ? const Color(0xFF334155) : Colors.grey[100]!),
       ),
       child: Column(
         children: [
@@ -265,8 +278,16 @@ class _AdminScreenState extends State<AdminScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(event.title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14), maxLines: 1, overflow: TextOverflow.ellipsis),
-                    Text('by Organizer ID: ${event.organizerId}', style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                    Text(
+                      event.title,
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: theme.colorScheme.onSurface),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      'by Organizer ID: ${event.organizerId}',
+                      style: TextStyle(fontSize: 11, color: theme.colorScheme.onSurface.withValues(alpha: 0.4)),
+                    ),
                   ],
                 ),
               ),
@@ -337,3 +358,4 @@ class _AdminScreenState extends State<AdminScreen> {
     );
   }
 }
+

@@ -65,7 +65,7 @@ class CustomButton extends StatelessWidget {
       case ButtonVariant.outline:
         bgColor = Colors.transparent;
         textColor = const Color(0xFF374151);
-        border = const BorderSide(color: Color(0xFFE5E7EB), width: 2);
+        border = BorderSide(color: textColorOverride ?? const Color(0xFFE5E7EB), width: 2);
         break;
     }
 

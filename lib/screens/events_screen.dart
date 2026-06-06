@@ -50,15 +50,25 @@ class _EventsScreenState extends State<EventsScreen> {
   void _applyFilters() {
     setState(() {
       _filteredEvents = _allEvents.where((event) {
-        final matchesSearch = event.title.toLowerCase().contains(_searchTerm.toLowerCase()) ||
-            event.description.toLowerCase().contains(_searchTerm.toLowerCase()) ||
+        final matchesSearch =
+            event.title.toLowerCase().contains(_searchTerm.toLowerCase()) ||
+            event.description.toLowerCase().contains(
+              _searchTerm.toLowerCase(),
+            ) ||
             event.location.toLowerCase().contains(_searchTerm.toLowerCase()) ||
-            event.tags.any((tag) => tag.toLowerCase().contains(_searchTerm.toLowerCase()));
-        
+            event.locationDetails.toLowerCase().contains(
+              _searchTerm.toLowerCase(),
+            ) ||
+            event.tags.any(
+              (tag) => tag.toLowerCase().contains(_searchTerm.toLowerCase()),
+            );
+
         final matchesType = _eventType == 'all' || event.type == _eventType;
-        
-        final matchesArea = _selectedArea == 'all' || event.location.toLowerCase().contains(_selectedArea.toLowerCase());
-        
+
+        final matchesArea =
+            _selectedArea == 'all' ||
+            event.location.toLowerCase().contains(_selectedArea.toLowerCase());
+
         bool matchesTime = true;
         if (_timeRange != 'all') {
           final hour = event.date.hour;
@@ -86,7 +96,10 @@ class _EventsScreenState extends State<EventsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Find Events', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Find Events',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         centerTitle: false,
         actions: [
           IconButton(
@@ -131,12 +144,27 @@ class _EventsScreenState extends State<EventsScreen> {
                   child: Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: _eventType != 'all' ? AppColors.primary : Colors.grey[100],
+                      color:
+                          (_eventType != 'all' ||
+                              _selectedArea != 'all' ||
+                              _timeRange != 'all')
+                          ? AppColors.primary
+                          : Theme.of(context).colorScheme.surface,
                       borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.1),
+                      ),
                     ),
                     child: Icon(
                       LucideIcons.filter,
-                      color: _eventType != 'all' ? Colors.white : AppColors.dark,
+                      color:
+                          (_eventType != 'all' ||
+                              _selectedArea != 'all' ||
+                              _timeRange != 'all')
+                          ? Colors.white
+                          : Theme.of(context).colorScheme.onSurface,
                       size: 20,
                     ),
                   ),
@@ -146,7 +174,10 @@ class _EventsScreenState extends State<EventsScreen> {
             const SizedBox(height: 16),
 
             // Active Filters
-            if (_searchTerm.isNotEmpty || _eventType != 'all' || _selectedArea != 'all' || _timeRange != 'all')
+            if (_searchTerm.isNotEmpty ||
+                _eventType != 'all' ||
+                _selectedArea != 'all' ||
+                _timeRange != 'all')
               Padding(
                 padding: const EdgeInsets.only(bottom: 16),
                 child: Wrap(
@@ -156,7 +187,9 @@ class _EventsScreenState extends State<EventsScreen> {
                   children: [
                     if (_eventType != 'all')
                       BadgeWidget(
-                        label: _eventType == 'virtual' ? '🌐 Virtual' : '📍 In-person',
+                        label: _eventType == 'virtual'
+                            ? '🌐 Virtual'
+                            : '📍 In-person',
                         variant: BadgeVariant.accent,
                         size: BadgeSize.sm,
                       ),
@@ -168,13 +201,20 @@ class _EventsScreenState extends State<EventsScreen> {
                       ),
                     if (_timeRange != 'all')
                       BadgeWidget(
-                        label: '🕒 ${_timeRange[0].toUpperCase()}${_timeRange.substring(1)}',
+                        label:
+                            '🕒 ${_timeRange[0].toUpperCase()}${_timeRange.substring(1)}',
                         variant: BadgeVariant.secondary,
                         size: BadgeSize.sm,
                       ),
                     TextButton(
                       onPressed: _clearFilters,
-                      child: const Text('Clear all', style: TextStyle(color: AppColors.primary, fontSize: 12)),
+                      child: const Text(
+                        'Clear all',
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 12,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -186,7 +226,10 @@ class _EventsScreenState extends State<EventsScreen> {
                 padding: const EdgeInsets.only(bottom: 16),
                 child: Text(
                   '${_filteredEvents.length} events found',
-                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ),
 
@@ -195,22 +238,30 @@ class _EventsScreenState extends State<EventsScreen> {
               child: _isLoading
                   ? const Center(child: LoadingSpinner())
                   : _filteredEvents.isEmpty
-                      ? EmptyState(
-                          title: 'No events found',
-                          description: _searchTerm.isNotEmpty || _eventType != 'all' ? 'Try adjusting your filters.' : 'No events available right now.',
-                          actionText: _searchTerm.isNotEmpty || _eventType != 'all' ? 'Clear Filters' : null,
-                          onAction: _searchTerm.isNotEmpty || _eventType != 'all' ? _clearFilters : null,
-                        )
-                      : ListView.builder(
-                          itemCount: _filteredEvents.length,
-                          padding: const EdgeInsets.only(bottom: 100),
-                          itemBuilder: (context, index) {
-                            return EventCard(
-                              event: _filteredEvents[index],
-                              onTap: () => context.push('/event/${_filteredEvents[index].id}'),
-                            );
-                          },
-                        ),
+                  ? EmptyState(
+                      title: 'No events found',
+                      description: _searchTerm.isNotEmpty || _eventType != 'all'
+                          ? 'Try adjusting your filters.'
+                          : 'No events available right now.',
+                      actionText: _searchTerm.isNotEmpty || _eventType != 'all'
+                          ? 'Clear Filters'
+                          : null,
+                      onAction: _searchTerm.isNotEmpty || _eventType != 'all'
+                          ? _clearFilters
+                          : null,
+                    )
+                  : ListView.builder(
+                      itemCount: _filteredEvents.length,
+                      padding: const EdgeInsets.only(bottom: 100),
+                      itemBuilder: (context, index) {
+                        return EventCard(
+                          event: _filteredEvents[index],
+                          onTap: () => context.push(
+                            '/event/${_filteredEvents[index].id}',
+                          ),
+                        );
+                      },
+                    ),
             ),
           ],
         ),
@@ -222,8 +273,10 @@ class _EventsScreenState extends State<EventsScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(32))),
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+      ),
       builder: (context) {
         return DraggableScrollableSheet(
           initialChildSize: 0.8,
@@ -231,12 +284,20 @@ class _EventsScreenState extends State<EventsScreen> {
           minChildSize: 0.5,
           expand: false,
           builder: (context, scrollController) {
+            final theme = Theme.of(context);
             return StatefulBuilder(
               builder: (context, setModalState) {
-                final areas = ['all', ..._allEvents.map((e) => e.location.split(',').last.trim()).toSet().toList()];
-                
+                final areas = [
+                  'all',
+                  ..._allEvents
+                      .map((e) => e.location.split(',').last.trim())
+                      .where((a) => a.isNotEmpty)
+                      .toSet(),
+                ];
+
                 return Container(
                   padding: const EdgeInsets.symmetric(horizontal: 24),
+                  color: theme.colorScheme.surface,
                   child: SingleChildScrollView(
                     controller: scrollController,
                     child: Column(
@@ -248,7 +309,9 @@ class _EventsScreenState extends State<EventsScreen> {
                             width: 40,
                             height: 4,
                             decoration: BoxDecoration(
-                              color: Colors.grey[300],
+                              color: theme.colorScheme.onSurface.withValues(alpha: 
+                                0.1,
+                              ),
                               borderRadius: BorderRadius.circular(2),
                             ),
                           ),
@@ -257,7 +320,14 @@ class _EventsScreenState extends State<EventsScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text('Filter Events', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                            Text(
+                              'Filter Events',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: theme.colorScheme.onSurface,
+                              ),
+                            ),
                             TextButton(
                               onPressed: () {
                                 setModalState(() {
@@ -274,33 +344,50 @@ class _EventsScreenState extends State<EventsScreen> {
                         const SizedBox(height: 24),
 
                         // Event Type
-                        const Text('Event Type', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                        Text(
+                          'Event Type',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: theme.colorScheme.onSurface,
+                          ),
+                        ),
                         const SizedBox(height: 12),
                         Row(
                           children: [
                             _FilterButton(
                               label: 'All',
                               isSelected: _eventType == 'all',
-                              onTap: () => setModalState(() => _eventType = 'all'),
+                              onTap: () =>
+                                  setModalState(() => _eventType = 'all'),
                             ),
                             const SizedBox(width: 8),
                             _FilterButton(
                               label: '🌐 Virtual',
                               isSelected: _eventType == 'virtual',
-                              onTap: () => setModalState(() => _eventType = 'virtual'),
+                              onTap: () =>
+                                  setModalState(() => _eventType = 'virtual'),
                             ),
                             const SizedBox(width: 8),
                             _FilterButton(
                               label: '📍 In-person',
                               isSelected: _eventType == 'in-person',
-                              onTap: () => setModalState(() => _eventType = 'in-person'),
+                              onTap: () =>
+                                  setModalState(() => _eventType = 'in-person'),
                             ),
                           ],
                         ),
                         const SizedBox(height: 24),
 
                         // Area
-                        const Text('Area / City', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                        Text(
+                          'Area / City',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: theme.colorScheme.onSurface,
+                          ),
+                        ),
                         const SizedBox(height: 12),
                         SizedBox(
                           height: 40,
@@ -313,11 +400,28 @@ class _EventsScreenState extends State<EventsScreen> {
                               return Padding(
                                 padding: const EdgeInsets.only(right: 8),
                                 child: ChoiceChip(
-                                  label: Text(area == 'all' ? 'All Cities' : area),
+                                  label: Text(
+                                    area == 'all' ? 'All Cities' : area,
+                                  ),
                                   selected: isSelected,
-                                  onSelected: (selected) => setModalState(() => _selectedArea = area),
+                                  onSelected: (selected) =>
+                                      setModalState(() => _selectedArea = area),
                                   selectedColor: AppColors.primary,
-                                  labelStyle: TextStyle(color: isSelected ? Colors.white : AppColors.dark),
+                                  backgroundColor: theme.colorScheme.surface,
+                                  labelStyle: TextStyle(
+                                    color: isSelected
+                                        ? Colors.white
+                                        : theme.colorScheme.onSurface,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                    side: BorderSide(
+                                      color: isSelected
+                                          ? AppColors.primary
+                                          : theme.colorScheme.onSurface
+                                                .withValues(alpha: 0.1),
+                                    ),
+                                  ),
                                 ),
                               );
                             },
@@ -326,7 +430,14 @@ class _EventsScreenState extends State<EventsScreen> {
                         const SizedBox(height: 24),
 
                         // Time
-                        const Text('Time of Day', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                        Text(
+                          'Time of Day',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                        ),
                         const SizedBox(height: 12),
                         Wrap(
                           spacing: 8,
@@ -335,19 +446,22 @@ class _EventsScreenState extends State<EventsScreen> {
                               label: 'Morning',
                               icon: LucideIcons.sunrise,
                               isSelected: _timeRange == 'morning',
-                              onTap: () => setModalState(() => _timeRange = 'morning'),
+                              onTap: () =>
+                                  setModalState(() => _timeRange = 'morning'),
                             ),
                             _FilterChip(
                               label: 'Afternoon',
                               icon: LucideIcons.sun,
                               isSelected: _timeRange == 'afternoon',
-                              onTap: () => setModalState(() => _timeRange = 'afternoon'),
+                              onTap: () =>
+                                  setModalState(() => _timeRange = 'afternoon'),
                             ),
                             _FilterChip(
                               label: 'Evening',
                               icon: LucideIcons.moon,
                               isSelected: _timeRange == 'evening',
-                              onTap: () => setModalState(() => _timeRange = 'evening'),
+                              onTap: () =>
+                                  setModalState(() => _timeRange = 'evening'),
                             ),
                           ],
                         ),
@@ -366,10 +480,19 @@ class _EventsScreenState extends State<EventsScreen> {
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.primary,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
                               elevation: 0,
                             ),
-                            child: const Text('Show Results', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                            child: const Text(
+                              'Show Results',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
                           ),
                         ),
                         const SizedBox(height: 40),
@@ -391,24 +514,33 @@ class _FilterButton extends StatelessWidget {
   final bool isSelected;
   final VoidCallback onTap;
 
-  const _FilterButton({required this.label, required this.isSelected, required this.onTap});
+  const _FilterButton({
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Expanded(
       child: GestureDetector(
         onTap: onTap,
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
-            color: isSelected ? AppColors.primary : Colors.grey[100],
+            color: isSelected
+                ? AppColors.primary
+                : theme.colorScheme.onSurface.withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
             label,
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: isSelected ? Colors.white : AppColors.textSecondary,
+              color: isSelected
+                  ? Colors.white
+                  : theme.colorScheme.onSurface.withValues(alpha: 0.6),
               fontWeight: FontWeight.bold,
               fontSize: 13,
             ),
@@ -434,15 +566,20 @@ class _FilterChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : Colors.grey[100],
+          color: isSelected
+              ? AppColors.primary
+              : theme.colorScheme.onSurface.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected ? AppColors.primary : Colors.grey[300]!,
+            color: isSelected
+                ? AppColors.primary
+                : theme.colorScheme.onSurface.withValues(alpha: 0.1),
             width: 1,
           ),
         ),
@@ -452,13 +589,15 @@ class _FilterChip extends StatelessWidget {
             Icon(
               icon,
               size: 16,
-              color: isSelected ? Colors.white : AppColors.textSecondary,
+              color: isSelected
+                  ? Colors.white
+                  : theme.colorScheme.onSurface.withValues(alpha: 0.4),
             ),
             const SizedBox(width: 8),
             Text(
               label,
               style: TextStyle(
-                color: isSelected ? Colors.white : AppColors.textSecondary,
+                color: isSelected ? Colors.white : theme.colorScheme.onSurface,
                 fontWeight: FontWeight.w600,
                 fontSize: 13,
               ),
@@ -469,3 +608,4 @@ class _FilterChip extends StatelessWidget {
     );
   }
 }
+

@@ -15,10 +15,7 @@ class LoadingSpinner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: SpinKitPulse(
-        color: color,
-        size: size,
-      ),
+      child: SpinKitPulse(color: color, size: size),
     );
   }
 }
@@ -42,7 +39,9 @@ class CardSkeleton extends StatelessWidget {
             height: 160,
             decoration: BoxDecoration(
               color: Colors.grey[200],
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(20),
+              ),
             ),
           ),
           Padding(
@@ -54,7 +53,11 @@ class CardSkeleton extends StatelessWidget {
                 const SizedBox(height: 8),
                 Container(height: 12, width: 100, color: Colors.grey[200]),
                 const SizedBox(height: 16),
-                Container(height: 40, width: double.infinity, color: Colors.grey[200]),
+                Container(
+                  height: 40,
+                  width: double.infinity,
+                  color: Colors.grey[200],
+                ),
               ],
             ),
           ),

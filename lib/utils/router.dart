@@ -11,6 +11,7 @@ import '../screens/profile_screen.dart';
 import '../screens/login_screen.dart';
 import '../screens/register_screen.dart';
 import '../screens/event_detail_screen.dart';
+import '../screens/settings_screen.dart';
 import '../widgets/main_shell.dart';
 
 class RouterNotifier extends ChangeNotifier {
@@ -57,6 +58,7 @@ class AppRouter {
           GoRoute(path: '/profile', builder: (context, state) => const ProfileScreen()),
           GoRoute(path: '/admin', builder: (context, state) => const AdminScreen()),
           GoRoute(path: '/create-event', builder: (context, state) => const CreateEventScreen()),
+          GoRoute(path: '/settings', builder: (context, state) => const SettingsScreen()),
         ],
       ),
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),

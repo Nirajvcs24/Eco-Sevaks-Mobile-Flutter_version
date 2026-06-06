@@ -180,3 +180,4 @@ class BadgeWidget extends StatelessWidget {
     }
   }
 }
+

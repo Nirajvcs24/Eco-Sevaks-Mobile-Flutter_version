@@ -48,9 +48,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
         _apiService.getAllEvents(),
       ]);
       setState(() {
-        _joinedEvents = results[0] as List<AppEvent>;
-        _createdEvents = results[1] as List<AppEvent>;
-        final allEvents = results[2] as List<AppEvent>;
+        _joinedEvents = results[0];
+        _createdEvents = results[1];
+        final allEvents = results[2];
         
         // Recommendations based on area
         final userArea = authProvider.user!.area.toLowerCase();
@@ -72,9 +72,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     try {
       await _apiService.leaveEvent(eventId);
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('RSVP cancelled')));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('RSVP cancelled')));
+      await context.read<AuthProvider>().refreshUser();
       _fetchData();
     } catch (e) {
       if (!mounted) return;
@@ -124,6 +123,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
     final user = authProvider.user;
+    final theme = Theme.of(context);
 
     if (user == null) {
       return const Scaffold(body: Center(child: Text('Please log in')));
@@ -135,10 +135,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Dashboard',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
+        title: const Text('Dashboard'),
       ),
       body: RefreshIndicator(
         onRefresh: _fetchData,
@@ -182,15 +179,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         const SizedBox(height: 12),
                         Text(
                           'Welcome, ${user.name}! 👋',
-                          style: const TextStyle(
-                            color: AppColors.dark,
+                          style: TextStyle(
+                            color: theme.colorScheme.onSurface,
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        const Text(
+                        Text(
                           'Your eco-volunteering overview',
-                          style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                          style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.6), fontSize: 12),
                         ),
                       ],
                     ),
@@ -209,24 +206,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 childAspectRatio: 1.5,
                 children: [
                   _buildStatCard(
+                    context,
                     LucideIcons.heart,
                     _joinedEvents.length.toString(),
                     'Joined',
                     AppColors.primary,
                   ),
                   _buildStatCard(
+                    context,
                     LucideIcons.calendar,
                     upcomingEvents.length.toString(),
                     'Upcoming',
                     AppColors.accent,
                   ),
                   _buildStatCard(
+                    context,
                     LucideIcons.clock,
                     (_joinedEvents.length - upcomingEvents.length).toString(),
                     'Completed',
                     Colors.green,
                   ),
                   _buildStatCard(
+                    context,
                     LucideIcons.users,
                     _createdEvents.length.toString(),
                     'Created',
@@ -268,13 +269,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   children: [
                     Text(
                       'Recommended in ${user.area}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.dark,
+                        color: theme.colorScheme.onSurface,
                       ),
                     ),
-                    BadgeWidget(
+                    const BadgeWidget(
                       label: 'New',
                       variant: BadgeVariant.accent,
                       size: BadgeSize.sm,
@@ -328,12 +329,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ],
 
               // Joined Events
-              const Text(
+              Text(
                 'Joined Events',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.dark,
+                  color: theme.colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 12),
@@ -362,12 +363,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
               const SizedBox(height: 32),
 
               // Created Events
-              const Text(
+              Text(
                 'Created Events',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.dark,
+                  color: theme.colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 12),
@@ -387,7 +388,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: _createdEvents.length,
                   itemBuilder: (context, index) =>
-                      _buildCreatedEventItem(_createdEvents[index]),
+                      _buildCreatedEventItem(context, _createdEvents[index]),
                 ),
               const SizedBox(height: 100),
             ],
@@ -398,22 +399,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildStatCard(
+    BuildContext context,
     IconData icon,
     String value,
     String label,
     Color color,
   ) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return FadeInUp(
       delay: const Duration(milliseconds: 400),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: isDark ? const Color(0xFF1E293B) : Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.grey[100]!),
+          border: Border.all(color: isDark ? const Color(0xFF334155) : Colors.grey[100]!),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
+              color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -428,17 +432,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
               children: [
                 CountUpText(
                   value: value,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.dark,
+                    color: theme.colorScheme.onSurface,
                   ),
                 ),
                 Text(
                   label,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 11,
-                    color: AppColors.textMuted,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
                   ),
                 ),
               ],
@@ -457,14 +461,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildCreatedEventItem(AppEvent event) {
+  Widget _buildCreatedEventItem(BuildContext context, AppEvent event) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF1E293B) : Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey[100]!),
+        border: Border.all(color: isDark ? const Color(0xFF334155) : Colors.grey[100]!),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -475,9 +481,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Expanded(
                 child: Text(
                   event.title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
+                    color: theme.colorScheme.onSurface,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -489,31 +496,31 @@ class _DashboardScreenState extends State<DashboardScreen> {
           const SizedBox(height: 8),
           Row(
             children: [
-              const Icon(
+              Icon(
                 LucideIcons.calendar,
                 size: 14,
-                color: AppColors.textMuted,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
               ),
               const SizedBox(width: 4),
               Text(
                 DateFormat('d MMM yyyy').format(event.date),
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
-                  color: AppColors.textMuted,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
                 ),
               ),
               const SizedBox(width: 16),
-              const Icon(
+              Icon(
                 LucideIcons.users,
                 size: 14,
-                color: AppColors.textMuted,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
               ),
               const SizedBox(width: 4),
               Text(
                 event.attendees.length.toString(),
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
-                  color: AppColors.textMuted,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
                 ),
               ),
             ],
@@ -539,7 +546,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   size: 18,
                 ),
                 style: IconButton.styleFrom(
-                  backgroundColor: Colors.red[50],
+                  backgroundColor: isDark ? Colors.red.withValues(alpha: 0.1) : Colors.red[50],
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -552,3 +559,4 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 }
+

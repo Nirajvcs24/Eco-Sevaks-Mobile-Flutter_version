@@ -58,6 +58,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Joined "${_event!.title}"!')),
       );
+      await authProvider.refreshUser();
       _fetchEvent(); // Refresh to show joined state
     } catch (e) {
       if (!mounted) return;
@@ -71,6 +72,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     if (_isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
@@ -165,33 +169,33 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                     crossAxisSpacing: 12,
                     childAspectRatio: 2.5,
                     children: [
-                      _buildInfoItem(LucideIcons.calendar, 'Date', formattedDate, AppColors.primary),
-                      _buildInfoItem(LucideIcons.clock, 'Time', formattedTime, AppColors.accent),
-                      _buildInfoItem(_event!.isVirtual ? LucideIcons.globe : LucideIcons.mapPin, 'Location',
+                      _buildInfoItem(context, LucideIcons.calendar, 'Date', formattedDate, AppColors.primary),
+                      _buildInfoItem(context, LucideIcons.clock, 'Time', formattedTime, AppColors.accent),
+                      _buildInfoItem(context, _event!.isVirtual ? LucideIcons.globe : LucideIcons.mapPin, 'Location',
                           _event!.isVirtual ? 'Online' : _event!.location, AppColors.secondary),
-                      _buildInfoItem(LucideIcons.users, 'Volunteers', '${_event!.attendees.length} joined', AppColors.primary),
+                      _buildInfoItem(context, LucideIcons.users, 'Volunteers', '${_event!.attendees.length} joined', AppColors.primary),
                     ],
                   ),
                   const SizedBox(height: 24),
 
                   // About
-                  const Text('About This Event', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.dark)),
+                  Text('About This Event', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface)),
                   const SizedBox(height: 8),
                   Text(
                     _event!.description,
-                    style: const TextStyle(fontSize: 14, color: AppColors.textSecondary, height: 1.6),
+                    style: TextStyle(fontSize: 14, color: theme.colorScheme.onSurface.withValues(alpha: 0.6), height: 1.6),
                   ),
                   const SizedBox(height: 24),
 
                   // Location Details
-                  const Text('Location Details', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.dark)),
+                  Text('Location Details', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface)),
                   const SizedBox(height: 8),
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.grey[50],
+                      color: isDark ? const Color(0xFF1E293B) : Colors.grey[50],
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.grey[200]!),
+                      border: Border.all(color: isDark ? const Color(0xFF334155) : Colors.grey[200]!),
                     ),
                     child: Row(
                       children: [
@@ -200,7 +204,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                         Expanded(
                           child: Text(
                             _event!.locationDetails.isEmpty ? (_event!.isVirtual ? 'Link provided after joining' : 'Address provided after joining') : _event!.locationDetails,
-                            style: const TextStyle(fontSize: 14, color: AppColors.dark, fontWeight: FontWeight.w500),
+                            style: TextStyle(fontSize: 14, color: theme.colorScheme.onSurface, fontWeight: FontWeight.w500),
                           ),
                         ),
                       ],
@@ -209,7 +213,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                   const SizedBox(height: 24),
 
                   if (_event!.whatToBring != null && _event!.whatToBring!.isNotEmpty) ...[
-                    const Text('What to Bring', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.dark)),
+                    Text('What to Bring', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface)),
                     const SizedBox(height: 12),
                     ..._event!.whatToBring!.split('. ').where((s) => s.isNotEmpty).map((item) => Padding(
                           padding: const EdgeInsets.only(bottom: 8),
@@ -218,7 +222,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                             children: [
                               const Icon(LucideIcons.checkCircle, size: 16, color: AppColors.primary),
                               const SizedBox(width: 8),
-                              Expanded(child: Text(item, style: const TextStyle(fontSize: 14, color: AppColors.textSecondary))),
+                              Expanded(child: Text(item, style: TextStyle(fontSize: 14, color: theme.colorScheme.onSurface.withValues(alpha: 0.6)))),
                             ],
                           ),
                         )),
@@ -234,7 +238,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                               label: tag,
                               variant: BadgeVariant.primary,
                               size: BadgeSize.sm,
-                              icon: const Icon(LucideIcons.tag, size: 10, color: Color(0xFF065F46)),
+                              icon: Icon(LucideIcons.tag, size: 10, color: isDark ? Colors.white : const Color(0xFF065F46)),
                             ))
                         .toList(),
                   ),
@@ -248,8 +252,8 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
       bottomSheet: Container(
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.9),
-          border: Border(top: BorderSide(color: Colors.grey[200]!, width: 1)),
+          color: theme.colorScheme.surface.withValues(alpha: 0.95),
+          border: Border(top: BorderSide(color: isDark ? const Color(0xFF334155) : Colors.grey[200]!, width: 1)),
         ),
         child: Row(
           children: [
@@ -258,8 +262,8 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(isPast ? 'Event ended' : 'Join this event', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-                  Text(_event!.title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis),
+                  Text(isPast ? 'Event ended' : 'Join this event', style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurface.withValues(alpha: 0.4))),
+                  Text(_event!.title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface), maxLines: 1, overflow: TextOverflow.ellipsis),
                 ],
               ),
             ),
@@ -280,13 +284,15 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     );
   }
 
-  Widget _buildInfoItem(IconData icon, String label, String value, Color color) {
+  Widget _buildInfoItem(BuildContext context, IconData icon, String label, String value, Color color) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF1E293B) : Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey[100]!),
+        border: Border.all(color: isDark ? const Color(0xFF334155) : Colors.grey[100]!),
       ),
       child: Row(
         children: [
@@ -301,8 +307,8 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(label, style: const TextStyle(fontSize: 10, color: AppColors.textMuted, fontWeight: FontWeight.bold)),
-                Text(value, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.dark), maxLines: 1, overflow: TextOverflow.ellipsis),
+                Text(label, style: TextStyle(fontSize: 10, color: theme.colorScheme.onSurface.withValues(alpha: 0.4), fontWeight: FontWeight.bold)),
+                Text(value, style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface), maxLines: 1, overflow: TextOverflow.ellipsis),
               ],
             ),
           ),
@@ -311,3 +317,4 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     );
   }
 }
+

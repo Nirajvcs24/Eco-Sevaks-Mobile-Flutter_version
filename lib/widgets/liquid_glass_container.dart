@@ -43,6 +43,9 @@ class _LiquidGlassContainerState extends State<LiquidGlassContainer> with Single
   Widget build(BuildContext context) {
     final borderRadius = widget.borderRadius ?? BorderRadius.circular(24);
 
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return ClipRRect(
       borderRadius: borderRadius,
       child: Stack(
@@ -52,7 +55,7 @@ class _LiquidGlassContainerState extends State<LiquidGlassContainer> with Single
             child: AnimatedBuilder(
               animation: _controller,
               builder: (context, child) {
-                final baseColor = widget.gradientColors?[0] ?? const Color(0xFFD1FAE5);
+                final baseColor = widget.gradientColors?[0] ?? (isDark ? const Color(0xFF064E3B) : const Color(0xFFD1FAE5));
                 return Container(
                   decoration: BoxDecoration(
                     color: baseColor.withValues(alpha: 0.9), // Maximum coverage
@@ -77,18 +80,18 @@ class _LiquidGlassContainerState extends State<LiquidGlassContainer> with Single
             filter: ImageFilter.blur(sigmaX: widget.blur, sigmaY: widget.blur),
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: widget.opacity),
+                color: (isDark ? Colors.black : Colors.white).withValues(alpha: widget.opacity),
                 borderRadius: borderRadius,
                 border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.2),
+                  color: (isDark ? Colors.black : Colors.white).withValues(alpha: 0.2),
                   width: 1.5,
                 ),
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    Colors.white.withValues(alpha: 0.2),
-                    Colors.white.withValues(alpha: 0.05),
+                    (isDark ? Colors.black : Colors.white).withValues(alpha: 0.2),
+                    (isDark ? Colors.black : Colors.white).withValues(alpha: 0.05),
                   ],
                 ),
               ),
@@ -131,3 +134,4 @@ class _LiquidGlassContainerState extends State<LiquidGlassContainer> with Single
     );
   }
 }
+

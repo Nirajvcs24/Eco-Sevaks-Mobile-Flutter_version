@@ -25,7 +25,7 @@ class HomeScreen extends StatelessWidget {
                 children: [
                   _buildStats(),
                   const SizedBox(height: 32),
-                  _buildHowItWorks(),
+                  _buildHowItWorks(context),
                   const SizedBox(height: 32),
                   _buildMission(context),
                   const SizedBox(height: 32),
@@ -137,7 +137,7 @@ class HomeScreen extends StatelessWidget {
                         Expanded(
                           child: CustomButton(
                             text: 'Get Started',
-                            onPressed: () => context.push('/profile'),
+                            onPressed: () => context.push('/dashboard'),
                             variant: ButtonVariant.outline,
                             textColorOverride: Colors.white,
                             leftIcon: const Icon(LucideIcons.arrowRight, size: 18, color: Colors.white),
@@ -182,27 +182,29 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHowItWorks() {
+  Widget _buildHowItWorks(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('How It Works', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.dark)),
-        const Text('Three simple steps to get started', style: TextStyle(fontSize: 14, color: AppColors.textSecondary)),
+        Text('How It Works', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface)),
+        Text('Three simple steps to get started', style: TextStyle(fontSize: 14, color: theme.colorScheme.onSurface.withValues(alpha: 0.6))),
         const SizedBox(height: 16),
-        _buildStep(LucideIcons.search, '1. Browse', 'Find events that match your passion', AppColors.primary.withValues(alpha: 0.1), AppColors.primary),
+        _buildStep(context, LucideIcons.search, '1. Browse', 'Find events that match your passion', AppColors.primary.withValues(alpha: 0.1), AppColors.primary),
         const SizedBox(height: 12),
-        _buildStep(LucideIcons.userPlus, '2. Join', 'Sign up with one tap', AppColors.accent.withValues(alpha: 0.1), AppColors.accent),
+        _buildStep(context, LucideIcons.userPlus, '2. Join', 'Sign up with one tap', AppColors.accent.withValues(alpha: 0.1), AppColors.accent),
         const SizedBox(height: 12),
-        _buildStep(LucideIcons.heart, '3. Participate', 'Connect with fellow volunteers', AppColors.secondary.withValues(alpha: 0.1), AppColors.secondary),
+        _buildStep(context, LucideIcons.heart, '3. Participate', 'Connect with fellow volunteers', AppColors.secondary.withValues(alpha: 0.1), AppColors.secondary),
       ],
     );
   }
 
-  Widget _buildStep(IconData icon, String title, String desc, Color bgColor, Color iconColor) {
+  Widget _buildStep(BuildContext context, IconData icon, String title, String desc, Color bgColor, Color iconColor) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 10, offset: const Offset(0, 4)),
@@ -220,8 +222,8 @@ class HomeScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.dark)),
-                Text(desc, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: theme.colorScheme.onSurface)),
+                Text(desc, style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurface.withValues(alpha: 0.6))),
               ],
             ),
           ),
@@ -231,6 +233,7 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildMission(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -247,15 +250,15 @@ class HomeScreen extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-        const Text('Building a Greener India, Together', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.dark)),
-        const Text(
+        Text('Building a Greener India, Together', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface)),
+        Text(
           'Eco-Sevaks connects passionate volunteers with meaningful environmental initiatives across India.',
-          style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+          style: TextStyle(fontSize: 14, color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
         ),
         const SizedBox(height: 16),
-        _buildMissionItem(LucideIcons.globe, 'Connect with local initiatives'),
-        _buildMissionItem(LucideIcons.users, 'Meet eco-conscious volunteers'),
-        _buildMissionItem(LucideIcons.award, 'Track your impact'),
+        _buildMissionItem(context, LucideIcons.globe, 'Connect with local initiatives'),
+        _buildMissionItem(context, LucideIcons.users, 'Meet eco-conscious volunteers'),
+        _buildMissionItem(context, LucideIcons.award, 'Track your impact'),
         const SizedBox(height: 24),
         CustomButton(
           text: 'Explore Opportunities',
@@ -266,7 +269,8 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMissionItem(IconData icon, String text) {
+  Widget _buildMissionItem(BuildContext context, IconData icon, String text) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
@@ -277,7 +281,7 @@ class HomeScreen extends StatelessWidget {
             child: Icon(icon, color: AppColors.primary, size: 16),
           ),
           const SizedBox(width: 12),
-          Text(text, style: const TextStyle(fontSize: 14, color: Color(0xFF334155))),
+          Text(text, style: TextStyle(fontSize: 14, color: theme.colorScheme.onSurface.withValues(alpha: 0.8))),
         ],
       ),
     );
@@ -342,17 +346,21 @@ class _StatItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         CountUpText(
           value: value,
           suffix: suffix,
-          style: const TextStyle(color: AppColors.dark, fontSize: 24, fontWeight: FontWeight.bold),
+          style: TextStyle(color: isDark ? Colors.white : AppColors.dark, fontSize: 24, fontWeight: FontWeight.bold),
         ),
-        Text(label, style: const TextStyle(color: AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.w500)),
+        Text(label, style: TextStyle(color: isDark ? Colors.white.withValues(alpha: 0.6) : AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.w500)),
       ],
     );
   }
 }
+
 

@@ -96,8 +96,10 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return Scaffold(
-      appBar: AppBar(title: const Text('New Event', style: TextStyle(fontWeight: FontWeight.bold))),
+      appBar: AppBar(title: const Text('New Event')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -105,9 +107,10 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: isDark ? const Color(0xFF1E293B) : Colors.white,
                 borderRadius: BorderRadius.circular(24),
-                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 20, offset: const Offset(0, 10))],
+                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05), blurRadius: 20, offset: const Offset(0, 10))],
+                border: isDark ? Border.all(color: const Color(0xFF334155)) : null,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -116,7 +119,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                     label: 'Event Title',
                     controller: _titleController,
                     required: true,
-                    leftIcon: const Icon(LucideIcons.fileText, size: 20, color: AppColors.textMuted),
+                    leftIcon: Icon(LucideIcons.fileText, size: 20, color: theme.colorScheme.onSurface.withValues(alpha: 0.4)),
                   ),
                   const SizedBox(height: 20),
                   CustomInput(
@@ -129,7 +132,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                   CustomInput(
                     label: 'Image URL (Optional)',
                     controller: _imageUrlController,
-                    leftIcon: const Icon(LucideIcons.image, size: 20, color: AppColors.textMuted),
+                    leftIcon: Icon(LucideIcons.image, size: 20, color: theme.colorScheme.onSurface.withValues(alpha: 0.4)),
                   ),
                   const SizedBox(height: 20),
                   GestureDetector(
@@ -137,17 +140,17 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                     child: Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: isDark ? const Color(0xFF0F172A) : Colors.white,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.grey[200]!, width: 2),
+                        border: Border.all(color: isDark ? const Color(0xFF334155) : Colors.grey[200]!, width: 2),
                       ),
                       child: Row(
                         children: [
-                          const Icon(LucideIcons.calendar, size: 20, color: AppColors.textMuted),
+                          Icon(LucideIcons.calendar, size: 20, color: theme.colorScheme.onSurface.withValues(alpha: 0.4)),
                           const SizedBox(width: 12),
                           Text(
                             _selectedDate == null ? 'Select Date & Time' : DateFormat('dd MMM yyyy, hh:mm a').format(_selectedDate!),
-                            style: TextStyle(color: _selectedDate == null ? AppColors.textMuted : AppColors.dark, fontWeight: FontWeight.bold),
+                            style: TextStyle(color: _selectedDate == null ? theme.colorScheme.onSurface.withValues(alpha: 0.4) : theme.colorScheme.onSurface, fontWeight: FontWeight.bold),
                           ),
                         ],
                       ),
@@ -156,8 +159,11 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                   const SizedBox(height: 20),
                   DropdownButtonFormField<String>(
                     initialValue: _type,
+                    dropdownColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+                    style: TextStyle(color: theme.colorScheme.onSurface),
                     decoration: InputDecoration(
                       labelText: 'Event Type',
+                      labelStyle: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                     ),
                     items: const [
@@ -172,7 +178,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                       label: 'City / Area',
                       controller: _locationController,
                       required: true,
-                      leftIcon: const Icon(LucideIcons.mapPin, size: 20, color: AppColors.textMuted),
+                      leftIcon: Icon(LucideIcons.mapPin, size: 20, color: theme.colorScheme.onSurface.withValues(alpha: 0.4)),
                       hint: 'e.g. Mumbai, Navi Mumbai',
                     ),
                     const SizedBox(height: 20),
@@ -181,7 +187,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                       controller: _locationDetailsController,
                       required: true,
                       maxLines: 2,
-                      leftIcon: const Icon(LucideIcons.navigation, size: 20, color: AppColors.textMuted),
+                      leftIcon: Icon(LucideIcons.navigation, size: 20, color: theme.colorScheme.onSurface.withValues(alpha: 0.4)),
                       hint: 'Detailed address where volunteers should meet',
                     ),
                   ] else ...[
@@ -189,7 +195,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                       label: 'Virtual Link / Platform Info',
                       controller: _locationDetailsController,
                       required: true,
-                      leftIcon: const Icon(LucideIcons.link, size: 20, color: AppColors.textMuted),
+                      leftIcon: Icon(LucideIcons.link, size: 20, color: theme.colorScheme.onSurface.withValues(alpha: 0.4)),
                       hint: 'e.g. Zoom link or Google Meet instructions',
                     ),
                   ],
@@ -198,7 +204,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                     label: 'Max Volunteers (0 = unlimited)',
                     controller: _maxVolunteersController,
                     keyboardType: TextInputType.number,
-                    leftIcon: const Icon(LucideIcons.users, size: 20, color: AppColors.textMuted),
+                    leftIcon: Icon(LucideIcons.users, size: 20, color: theme.colorScheme.onSurface.withValues(alpha: 0.4)),
                   ),
                   const SizedBox(height: 20),
                   CustomInput(
@@ -207,7 +213,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                     maxLines: 2,
                   ),
                   const SizedBox(height: 24),
-                  const Text('Tags (up to 5)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textSecondary)),
+                  Text('Tags (up to 5)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface.withValues(alpha: 0.6))),
                   const SizedBox(height: 8),
                   Row(
                     children: [
@@ -253,3 +259,4 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     );
   }
 }
+
