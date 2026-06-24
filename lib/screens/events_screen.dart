@@ -25,6 +25,7 @@ class _EventsScreenState extends State<EventsScreen> {
   String _eventType = 'all';
   String _selectedArea = 'all';
   String _timeRange = 'all'; // all, morning, afternoon, evening
+  bool _hidePast = false; // hide events that have already occurred
 
   @override
   void initState() {
@@ -76,8 +77,11 @@ class _EventsScreenState extends State<EventsScreen> {
           if (_timeRange == 'afternoon') matchesTime = hour >= 12 && hour < 18;
           if (_timeRange == 'evening') matchesTime = hour >= 18 && hour <= 23;
         }
-
-        return matchesSearch && matchesType && matchesArea && matchesTime;
+        bool matchesFuture = true;
+        if (_hidePast) {
+          matchesFuture = event.date.isAfter(DateTime.now());
+        }
+        return matchesSearch && matchesType && matchesArea && matchesTime && matchesFuture;
       }).toList();
     });
   }
@@ -88,6 +92,7 @@ class _EventsScreenState extends State<EventsScreen> {
       _eventType = 'all';
       _selectedArea = 'all';
       _timeRange = 'all';
+      _hidePast = false;
       _applyFilters();
     });
   }
@@ -147,7 +152,8 @@ class _EventsScreenState extends State<EventsScreen> {
                       color:
                           (_eventType != 'all' ||
                               _selectedArea != 'all' ||
-                              _timeRange != 'all')
+                              _timeRange != 'all' ||
+                              _hidePast)
                           ? AppColors.primary
                           : Theme.of(context).colorScheme.surface,
                       borderRadius: BorderRadius.circular(12),
@@ -162,7 +168,8 @@ class _EventsScreenState extends State<EventsScreen> {
                       color:
                           (_eventType != 'all' ||
                               _selectedArea != 'all' ||
-                              _timeRange != 'all')
+                              _timeRange != 'all' ||
+                              _hidePast)
                           ? Colors.white
                           : Theme.of(context).colorScheme.onSurface,
                       size: 20,
@@ -177,7 +184,8 @@ class _EventsScreenState extends State<EventsScreen> {
             if (_searchTerm.isNotEmpty ||
                 _eventType != 'all' ||
                 _selectedArea != 'all' ||
-                _timeRange != 'all')
+                _timeRange != 'all' ||
+                _hidePast)
               Padding(
                 padding: const EdgeInsets.only(bottom: 16),
                 child: Wrap(
@@ -185,6 +193,12 @@ class _EventsScreenState extends State<EventsScreen> {
                   runSpacing: 8,
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
+                    if (_hidePast)
+                      const BadgeWidget(
+                        label: '⏳ Upcoming Only',
+                        variant: BadgeVariant.secondary,
+                        size: BadgeSize.sm,
+                      ),
                     if (_eventType != 'all')
                       BadgeWidget(
                         label: _eventType == 'virtual'
@@ -240,13 +254,13 @@ class _EventsScreenState extends State<EventsScreen> {
                   : _filteredEvents.isEmpty
                   ? EmptyState(
                       title: 'No events found',
-                      description: _searchTerm.isNotEmpty || _eventType != 'all'
+                      description: _searchTerm.isNotEmpty || _eventType != 'all' || _hidePast
                           ? 'Try adjusting your filters.'
                           : 'No events available right now.',
-                      actionText: _searchTerm.isNotEmpty || _eventType != 'all'
+                      actionText: _searchTerm.isNotEmpty || _eventType != 'all' || _hidePast
                           ? 'Clear Filters'
                           : null,
-                      onAction: _searchTerm.isNotEmpty || _eventType != 'all'
+                      onAction: _searchTerm.isNotEmpty || _eventType != 'all' || _hidePast
                           ? _clearFilters
                           : null,
                     )
@@ -334,6 +348,7 @@ class _EventsScreenState extends State<EventsScreen> {
                                   _eventType = 'all';
                                   _selectedArea = 'all';
                                   _timeRange = 'all';
+                                  _hidePast = false;
                                 });
                                 _applyFilters();
                               },
@@ -342,7 +357,21 @@ class _EventsScreenState extends State<EventsScreen> {
                           ],
                         ),
                         const SizedBox(height: 24),
-
+                        // Hide Past Events Toggle
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text('Hide Past Events', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface)),
+                            Switch(
+                              value: _hidePast,
+                              onChanged: (val) {
+                                setModalState(() => _hidePast = val);
+                                _applyFilters();
+                              },
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 24),
                         // Event Type
                         Text(
                           'Event Type',

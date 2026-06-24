@@ -127,20 +127,36 @@ class HomeScreen extends StatelessWidget {
                     child: Row(
                       children: [
                         Expanded(
-                          child: CustomButton(
-                            text: 'Find Events',
-                            onPressed: () => context.push('/events'),
-                            leftIcon: const Icon(LucideIcons.search, size: 18, color: Colors.white),
+                          child: GestureDetector(
+                            behavior: HitTestBehavior.translucent,
+                            onTap: () => context.push('/events'),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 12.0),
+                              child: CustomButton(
+                                text: 'Find Events',
+                                onPressed: () => context.push('/events'),
+                                size: ButtonSize.lg,
+                                leftIcon: const Icon(LucideIcons.search, size: 18, color: Colors.white),
+                              ),
+                            ),
                           ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
-                          child: CustomButton(
-                            text: 'Get Started',
-                            onPressed: () => context.push('/dashboard'),
-                            variant: ButtonVariant.outline,
-                            textColorOverride: Colors.white,
-                            leftIcon: const Icon(LucideIcons.arrowRight, size: 18, color: Colors.white),
+                          child: GestureDetector(
+                            behavior: HitTestBehavior.translucent,
+                            onTap: () => context.push('/dashboard'),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 12.0),
+                              child: CustomButton(
+                                text: 'Get Started',
+                                onPressed: () => context.push('/dashboard'),
+                                variant: ButtonVariant.outline,
+                                size: ButtonSize.lg,
+                                textColorOverride: Colors.white,
+                                leftIcon: const Icon(LucideIcons.arrowRight, size: 18, color: Colors.white),
+                              ),
+                            ),
                           ),
                         ),
                       ],

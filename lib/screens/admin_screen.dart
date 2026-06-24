@@ -333,7 +333,7 @@ class _AdminScreenState extends State<AdminScreen> {
                 Expanded(
                   child: CustomButton(
                     text: 'View',
-                    onPressed: () => context.go('/event/${event.id}'),
+                    onPressed: () => context.push('/event/${event.id}'),
                     variant: ButtonVariant.outline,
                     size: ButtonSize.sm,
                     leftIcon: const Icon(LucideIcons.eye, size: 14),

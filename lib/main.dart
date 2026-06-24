@@ -5,6 +5,7 @@ import 'constants/app_theme.dart';
 import 'services/mongodb_service.dart';
 import 'providers/theme_provider.dart';
 import 'utils/router.dart';
+import 'services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,6 +17,9 @@ void main() async {
   } catch (e) {
     debugPrint("Failed to connect to MongoDB on startup: $e");
   }
+
+  // Initialize Notifications (Firebase + Local fallback)
+  await NotificationService().initialize();
 
   runApp(const MyApp());
 }
